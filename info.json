@@ -1,0 +1,18 @@
+{ 
+I want to make an application with a main GUI written in the svelte framework and the code in python, help me set this up.
+It has to be written in english without no comments in the codes. 
+Give me a whole app with the tree directory folders and Codes how i can best make a setup what later can be very easily be adjusted and functions can add.
+The options should be placed in a config.json file in the settings folder.
+The whole idea is a GUI were i can chose to main functions, filteren images from a directory like the code in Filter_best_images in. In this code it looks at the highest in the folder and does place this in one folder.
+But in a second case there is no highest confidence but has it extract the image named 'clean.jpg' from every folder in the given directory, but in this case it has to add the subfolder name were this image is found so they have seperated names or the images wouild constantly clean.jpg write each other over.
+the third strategy is for the images that it takes every 1, 2, 3 or 5 or 7 etc. image in the directory for example with 2 , it takes 2 4 6 8 10 12 14 etc. image.
+So what is the best approach how to do this maybe with multiple scripts to handle what it has to do. And in the main gui were  i can with vinkjes to tell what the situaton is. Also it has to get to search in the folder to click what the input folder is with search and the output folder.
+The second functions is renaming the images that are extracted with a prefix name before the file name for example name_originalfilename.jpg.
+This option of course with the output folder and be activated or inactivated with a option button.
+When the application runs it has to given a visual interacting with a loading block how many folders / images are done and the total folder images, it does not have to be a percentage just a number of total is good
+The output folders should be placed in a main folder and named wiht the moment they are made, with an option that the folders are filled to 1.9 gb size, or just all in one folder wit no limit.
+Also it needs an option to delete the subfolders if done were the images are extracted from, the images are extracted means there are placed/moved and not copied.
+All these option should have their own script code if that is a smart move atleast. 
+The images are placed in subfolders in a main folder wich can be anything but the starting folder is always detections\ and the second for example dry_cows or mounts and the validated or unvalidated but that doesn's matter cause both should be placed in the same end folder. In these validated or unvalidated are the subfolders placed like named 2026-03-16T08-49-28 and the images here are 2026-03-16T08-49-34.843_0.881 were the last numbers represent the confidence in this example is the confidence _0.881 or 88.1% 
+The github repo's has a deploy.yml for actions to transform it as a .exe , this should be done so it can be downloaded as an zipped .exe and can be unzipped and used as the executable
+}
