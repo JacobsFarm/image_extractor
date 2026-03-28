@@ -1,5 +1,8 @@
 # Image Extractor
 
+## Explanation video
+https://www.youtube.com/watch?v=vHgYNldPFcM
+
 Image Extractor is a hybrid desktop application designed to scan deeply nested directory structures, extract specific images based on customizable strategies, and neatly organize them into designated output folders. 
 
 It features a modern, lightweight graphical user interface built with Svelte and a file-processing backend written in Python. The application communicates via Eel and compiles into a single standalone `.exe` file for easy distribution.
