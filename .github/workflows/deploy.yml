@@ -35,20 +35,24 @@ jobs:
           npm install
           npm run build
 
-      - name: Build Executable
+      - name: Build Executable with PyInstaller
         run: pyinstaller --noconsole --onefile --add-data "frontend/dist;frontend/dist" main.py
 
-      # Deze stap uploadt de .exe direct naar de release die je net hebt aangemaakt
-      - name: Upload Release Asset
+      - name: Create Zip Archive
+        shell: pwsh
+        run: |
+          # We maken een zip van de exe in de dist map
+          Compress-Archive -Path dist/main.exe -DestinationPath dist/ImageExtractor-Windows.zip
+
+      - name: Upload Zip to Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/main.exe
+          files: dist/ImageExtractor-Windows.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Optioneel: Je kunt de artifact ook nog steeds bewaren in het Actions tabblad
-      - name: Upload Artifact
+      - name: Upload Artifact (Backup in Actions tab)
         uses: actions/upload-artifact@v4
         with:
-          name: ImageExtractor
-          path: dist/main.exe
+          name: ImageExtractor-Windows-Zip
+          path: dist/ImageExtractor-Windows.zip
