@@ -1,16 +1,18 @@
-name: Build Executable
+name: Build and Release Executable
 
 on:
-  push:
-    branches:
-      - main
+  release:
+    types: [published] # De Action start zodra je een Release publiceert
 
 jobs:
   build:
     runs-on: windows-latest
+    permissions:
+      contents: write # Cruciaal: hiermee mag de Action bestanden toevoegen aan de release
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -36,6 +38,15 @@ jobs:
       - name: Build Executable
         run: pyinstaller --noconsole --onefile --add-data "frontend/dist;frontend/dist" main.py
 
+      # Deze stap uploadt de .exe direct naar de release die je net hebt aangemaakt
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/main.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Optioneel: Je kunt de artifact ook nog steeds bewaren in het Actions tabblad
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
