@@ -1,6 +1,6 @@
 # Image Extractor
 
-## Explanation video
+Explanation video
 https://www.youtube.com/watch?v=vHgYNldPFcM
 
 Image Extractor is a hybrid desktop application designed to scan deeply nested directory structures, extract specific images based on customizable strategies, and neatly organize them into designated output folders. 
