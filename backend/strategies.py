@@ -14,7 +14,7 @@ def get_highest_confidence_image(folder_path):
                 best_file = file
     return best_file
 
-def get_exact_image(folder_path, target_name):
+def get_clean_image(folder_path, target_name):
     for file in os.listdir(folder_path):
         if file.lower() == target_name.lower():
             return file
