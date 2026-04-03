@@ -2,7 +2,7 @@ import os
 import shutil
 import datetime
 import eel
-from backend.strategies import get_highest_confidence_image, get_exact_image, get_nth_images
+from backend.strategies import get_highest_confidence_image, get_clean_image, get_nth_images # Functienaam aangepast
 
 MAX_DIR_SIZE = 1.9 * 1024 * 1024 * 1024
 
@@ -49,11 +49,12 @@ def process_images(config):
             if best: 
                 sub_name = os.path.basename(folder)
                 selected_files.append((best, f"{sub_name}_{best}"))
-        elif strategy == "exact":
-            exact = get_exact_image(folder, target_filename)
-            if exact:
+        elif strategy == "clean": # Aangepast van "exact" naar "clean" om te matchen met de UI
+            clean_file = get_clean_image(folder, target_filename) # Functie aangeroepen
+            if clean_file:
                 sub_name = os.path.basename(folder)
-                selected_files.append((exact, f"{sub_name}_{exact}"))
+                # Voegt submapnaam toe om overschrijven te voorkomen
+                selected_files.append((clean_file, f"{sub_name}_{clean_file}"))
         elif strategy == "nth":
             nth_files = get_nth_images(folder, nth)
             sub_name = os.path.basename(folder)
@@ -62,6 +63,7 @@ def process_images(config):
 
         for original_name, target_name in selected_files:
             source_path = os.path.join(folder, original_name)
+            # Voegt de prefix toe als deze is ingevuld
             final_name = f"{prefix}_{target_name}" if prefix else target_name
             file_size = os.path.getsize(source_path)
 
