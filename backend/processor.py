@@ -2,7 +2,7 @@ import os
 import shutil
 import datetime
 import eel
-from backend.strategies import get_highest_confidence_image, get_clean_image, get_nth_images # Functienaam aangepast
+from backend.strategies import get_highest_confidence_image, get_clean_image, get_nth_images
 
 MAX_DIR_SIZE = 1.9 * 1024 * 1024 * 1024
 
@@ -12,7 +12,6 @@ def process_images(config):
     strategy = config["strategy"]
     nth = int(config.get("nth_image", 2))
     prefix = config.get("rename_prefix", "")
-    target_filename = config.get("target_filename", "clean.jpg")
     limit_size = config.get("limit_size", False)
     delete_dirs = config.get("delete_subfolders", False)
 
@@ -49,12 +48,21 @@ def process_images(config):
             if best: 
                 sub_name = os.path.basename(folder)
                 selected_files.append((best, f"{sub_name}_{best}"))
-        elif strategy == "clean": # Aangepast van "exact" naar "clean" om te matchen met de UI
-            clean_file = get_clean_image(folder, target_filename) # Functie aangeroepen
+                
+        elif strategy == "clean": 
+            # Zoekt specifiek naar clean.jpg
+            clean_file = get_clean_image(folder, "clean.jpg") 
             if clean_file:
                 sub_name = os.path.basename(folder)
-                # Voegt submapnaam toe om overschrijven te voorkomen
                 selected_files.append((clean_file, f"{sub_name}_{clean_file}"))
+                
+        elif strategy == "best":
+            # NIEUW: Zoekt specifiek naar best.jpg
+            best_file = get_clean_image(folder, "best.jpg")
+            if best_file:
+                sub_name = os.path.basename(folder)
+                selected_files.append((best_file, f"{sub_name}_{best_file}"))
+                
         elif strategy == "nth":
             nth_files = get_nth_images(folder, nth)
             sub_name = os.path.basename(folder)
