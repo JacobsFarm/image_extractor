@@ -10,7 +10,6 @@
     limit_size: false,
     delete_subfolders: false,
   };
-
   let progress = { current: 0, total: 0 };
   let isProcessing = false;
 
@@ -68,6 +67,10 @@
     <label>
       <input type="radio" bind:group={config.strategy} value="clean" />
       Extract clean.jpg
+    </label>
+    <label>
+      <input type="radio" bind:group={config.strategy} value="best" />
+      Extract best.jpg
     </label>
     <label>
       <input type="radio" bind:group={config.strategy} value="nth" />
