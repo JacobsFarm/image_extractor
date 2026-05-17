@@ -57,11 +57,25 @@ def process_images(config):
                 selected_files.append((clean_file, f"{sub_name}_{clean_file}"))
                 
         elif strategy == "best":
-            # NIEUW: Zoekt specifiek naar best.jpg
+            # Zoekt specifiek naar best.jpg
             best_file = get_clean_image(folder, "best.jpg")
             if best_file:
                 sub_name = os.path.basename(folder)
                 selected_files.append((best_file, f"{sub_name}_{best_file}"))
+                
+        elif strategy == "metadata":
+            # NIEUW: Zoekt specifiek naar metadata.json
+            metadata_file = get_clean_image(folder, "metadata.json")
+            if metadata_file:
+                sub_name = os.path.basename(folder)
+                selected_files.append((metadata_file, f"{sub_name}_{metadata_file}"))
+                
+        elif strategy == "video":
+            # NIEUW: Zoekt specifiek naar video.mp4
+            video_file = get_clean_image(folder, "video.mp4")
+            if video_file:
+                sub_name = os.path.basename(folder)
+                selected_files.append((video_file, f"{sub_name}_{video_file}"))
                 
         elif strategy == "nth":
             nth_files = get_nth_images(folder, nth)
