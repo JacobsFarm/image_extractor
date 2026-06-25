@@ -26,15 +26,26 @@
 
     eel.expose(update_progress, "update_progress");
     eel.expose(processing_complete, "processing_complete");
+    eel.expose(extraction_message, "extraction_message");
   });
+
+  let lastMessage = "";
 
   function update_progress(current, total) {
     progress = { current, total };
   }
 
+  function extraction_message(message) {
+    lastMessage = message;
+  }
+
   function processing_complete() {
     isProcessing = false;
-    alert("Extraction complete!");
+    if (lastMessage) {
+      alert(lastMessage);
+    } else {
+      alert("Extraction complete!");
+    }
   }
 
   async function selectFolder(type) {
@@ -48,6 +59,7 @@
 
   function start() {
     isProcessing = true;
+    lastMessage = "";
     progress = { current: 0, total: 0 };
     eel.start_processing(config)();
   }
