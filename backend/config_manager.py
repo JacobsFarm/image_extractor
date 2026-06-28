@@ -21,7 +21,8 @@ def load_config():
             "nth_image": 2,
             "rename_prefix": "",
             "limit_size": False,
-            "delete_subfolders": False
+            "delete_subfolders": False,
+            "copy_files": False
         }
         with open(CONFIG_PATH, "w") as f:
             json.dump(default_config, f, indent=4)

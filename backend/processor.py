@@ -17,6 +17,18 @@ def clean_path(value):
         return ""
     return os.path.normpath(value.strip().strip('"').strip("'"))
 
+def determine_category(folder_path, input_dir):
+    parts = folder_path.split(os.sep)
+    lower_parts = [p.lower() for p in parts]
+    if "detections" in lower_parts:
+        idx = lower_parts.index("detections")
+        if idx + 1 < len(parts):
+            return parts[idx + 1]
+    rel_parts = os.path.relpath(folder_path, input_dir).split(os.sep)
+    if rel_parts and rel_parts[0] not in (os.curdir, ""):
+        return rel_parts[0]
+    return "extracted"
+
 def process_images(config):
     input_dir = clean_path(config.get("input_folder", ""))
     output_base_dir = clean_path(config.get("output_folder", ""))
@@ -24,7 +36,8 @@ def process_images(config):
     nth = int(config.get("nth_image", 2))
     prefix = config.get("rename_prefix", "")
     limit_size = config.get("limit_size", False)
-    delete_dirs = config.get("delete_subfolders", False)
+    copy_files = config.get("copy_files", False)
+    delete_dirs = config.get("delete_subfolders", False) and not copy_files
 
     if not input_dir or not output_base_dir:
         notify("Geen invoer- of uitvoermap ingesteld.")
@@ -62,9 +75,7 @@ def process_images(config):
     move_errors = []
 
     for folder in subfolders:
-        rel_path = os.path.relpath(folder, input_dir)
-        parts = rel_path.split(os.sep)
-        category = parts[0] if parts else "extracted"
+        category = determine_category(folder, input_dir)
 
         if category not in active_output_dirs:
             timestamp = datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
@@ -131,7 +142,10 @@ def process_images(config):
                     category_sizes[category] = 0
 
                 target_path = os.path.join(active_output_dirs[category], final_name)
-                shutil.move(source_path, target_path)
+                if copy_files:
+                    shutil.copy2(source_path, target_path)
+                else:
+                    shutil.move(source_path, target_path)
                 category_sizes[category] += file_size
                 moved_files += 1
             except Exception as e:
@@ -147,7 +161,8 @@ def process_images(config):
         processed_folders += 1
         eel.update_progress(processed_folders, total_folders)()
 
-    summary = f"Klaar: {moved_files} bestand(en) verplaatst uit {total_folders} map(pen)."
+    verb = "gekopieerd" if copy_files else "verplaatst"
+    summary = f"Klaar: {moved_files} bestand(en) {verb} uit {total_folders} map(pen)."
     if moved_files == 0:
         summary += ("\n\nLet op: er is niets verplaatst. De gekozen strategie vond geen passend "
                     "bestand in de mappen (bijv. strategie 'Highest Confidence' terwijl de bestanden "

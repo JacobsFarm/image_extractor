@@ -9,6 +9,7 @@
     rename_prefix: "",
     limit_size: false,
     delete_subfolders: false,
+    copy_files: false,
   };
   let progress = { current: 0, total: 0 };
   let isProcessing = false;
@@ -140,8 +141,8 @@
 
     {#if config.strategy === 'nth'}
       <div class="nth-input-container">
-        <label>Every Nth image interval:</label>
-        <input type="number" bind:value={config.nth_image} min="1" style="width: 60px;" />
+        <label for="nth-interval">Every Nth image interval:</label>
+        <input id="nth-interval" type="number" bind:value={config.nth_image} min="1" style="width: 60px;" />
       </div>
     {/if}
   </section>
@@ -149,15 +150,19 @@
   <section>
     <h3>Options</h3>
     <div class="row">
-      <label class="inline-label">Rename Prefix:</label>
-      <input type="text" bind:value={config.rename_prefix} />
+      <label class="inline-label" for="rename-prefix">Rename Prefix:</label>
+      <input id="rename-prefix" type="text" bind:value={config.rename_prefix} />
     </div>
     <label class="checkbox-label">
       <input type="checkbox" bind:checked={config.limit_size} />
       Limit output folders to 1.9GB
     </label>
     <label class="checkbox-label">
-      <input type="checkbox" bind:checked={config.delete_subfolders} />
+      <input type="checkbox" bind:checked={config.copy_files} />
+      Copy files instead of moving them
+    </label>
+    <label class="checkbox-label" class:disabled={config.copy_files}>
+      <input type="checkbox" bind:checked={config.delete_subfolders} disabled={config.copy_files} />
       Delete original subfolders after extracting
     </label>
   </section>
@@ -213,6 +218,7 @@
   .nth-input-container { margin-top: 15px; display: flex; align-items: center; gap: 10px; background: #fff; padding: 10px 15px; border: 1px dashed #ccc; border-radius: 6px;}
   .inline-label { margin: 0; }
   .checkbox-label { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; cursor: pointer; }
+  .checkbox-label.disabled { opacity: 0.5; cursor: not-allowed; }
 
   .folder-btn { padding: 8px 16px; border-radius: 4px; border: 1px solid #ccc; background: #fff; cursor: pointer; transition: 0.2s; }
   .folder-btn:hover { background: #eef; }
