@@ -14,7 +14,7 @@ It features a modern, lightweight graphical user interface built with Svelte and
 * **Automated Renaming:** Prepends the original subfolder's timestamp to the extracted file to prevent file overwriting.
 * **Custom Prefixes:** Add a custom text prefix to both the generated output folders and the extracted files.
 * **Smart Folder Chunking:** Optionally limit output folders to 1.9 GB. Once the limit is reached, the application automatically generates a new timestamped folder.
-* **Cleanup Mode:** Optionally force-delete the original subfolders and their remaining contents after a successful extraction.
+* **Cleanup Mode:** Optionally clear out the original subfolders after a successful extraction. Nothing is ever deleted permanently: the subfolder (including its remaining contents) is moved to a `recycle_bin` folder inside the input folder, keeping its original folder structure. As an extra safeguard, only subfolders whose name starts with a valid date (`YYYY-MM-DD`, e.g. `2025-06-25T10-00-00_ab12`) are touched — any other folder is left exactly where it is and reported at the end of the run.
 * **Persistent Settings:** Remembers your last used folders and preferences across sessions via an auto-generated configuration file.
 * **Categorized UI:** An intuitive tabbed interface splitting extraction strategies into **Data** and **Media** categories.
 

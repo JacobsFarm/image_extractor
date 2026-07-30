@@ -1,10 +1,18 @@
 import os
+import re
 import shutil
 import datetime
 import eel
 from backend.strategies import get_highest_confidence_image, get_clean_image, get_nth_images
 
 MAX_DIR_SIZE = 1.9 * 1024 * 1024 * 1024
+
+# Map waar verwerkte submappen naartoe gaan in plaats van dat ze verwijderd worden.
+RECYCLE_BIN_NAME = "recycle_bin"
+
+# Detectiemappen beginnen altijd met een datum: JJJJ-MM-DD, gevolgd door een
+# willekeurige code. Alles wat hier niet aan voldoet blijft ongemoeid staan.
+DETECTION_FOLDER_PATTERN = re.compile(r"^(\d{4})-(\d{2})-(\d{2})(?!\d)")
 
 def notify(message):
     try:
@@ -29,6 +37,37 @@ def determine_category(folder_path, input_dir):
         return rel_parts[0]
     return "extracted"
 
+def is_detection_folder_name(name):
+    """True als de mapnaam begint met een geldige datum (JJJJ-MM-DD)."""
+    match = DETECTION_FOLDER_PATTERN.match(name)
+    if not match:
+        return False
+    year, month, day = (int(part) for part in match.groups())
+    try:
+        datetime.date(year, month, day)
+    except ValueError:
+        return False
+    return True
+
+def unique_destination(path):
+    """Voorkomt dat een eerdere map in de recycle_bin overschreven wordt."""
+    if not os.path.exists(path):
+        return path
+    counter = 1
+    while os.path.exists(f"{path}__{counter}"):
+        counter += 1
+    return f"{path}__{counter}"
+
+def move_to_recycle_bin(folder, input_dir, recycle_root):
+    """Verplaatst een verwerkte submap naar de recycle_bin, met behoud van de mapstructuur."""
+    relative = os.path.relpath(folder, input_dir)
+    destination = unique_destination(os.path.join(recycle_root, relative))
+    parent = os.path.dirname(destination)
+    if parent:
+        os.makedirs(parent, exist_ok=True)
+    shutil.move(folder, destination)
+    return destination
+
 def process_images(config):
     input_dir = clean_path(config.get("input_folder", ""))
     output_base_dir = clean_path(config.get("output_folder", ""))
@@ -37,7 +76,7 @@ def process_images(config):
     prefix = config.get("rename_prefix", "")
     limit_size = config.get("limit_size", False)
     copy_files = config.get("copy_files", False)
-    delete_dirs = config.get("delete_subfolders", False) and not copy_files
+    recycle_dirs = config.get("delete_subfolders", False) and not copy_files
 
     if not input_dir or not output_base_dir:
         notify("Geen invoer- of uitvoermap ingesteld.")
@@ -50,9 +89,13 @@ def process_images(config):
         eel.processing_complete()()
         return
 
+    recycle_root = os.path.join(input_dir, RECYCLE_BIN_NAME)
+
     subfolders = []
     walk_errors = []
     for root, dirs, files in os.walk(input_dir, onerror=walk_errors.append):
+        # De recycle_bin zelf nooit opnieuw verwerken.
+        dirs[:] = [d for d in dirs if os.path.join(root, d) != recycle_root]
         if files:
             subfolders.append(root)
 
@@ -73,8 +116,16 @@ def process_images(config):
     category_sizes = {}
     moved_files = 0
     move_errors = []
+    recycled_folders = 0
+    skipped_folders = []
 
     for folder in subfolders:
+        if not os.path.isdir(folder):
+            # Map is al meeverhuisd met een bovenliggende map naar de recycle_bin.
+            processed_folders += 1
+            eel.update_progress(processed_folders, total_folders)()
+            continue
+
         category = determine_category(folder, input_dir)
 
         if category not in active_output_dirs:
@@ -151,12 +202,19 @@ def process_images(config):
             except Exception as e:
                 move_errors.append(f"{source_path}: {e}")
 
-        if delete_dirs:
-            try:
-                if os.path.exists(folder):
-                    shutil.rmtree(folder)
-            except Exception as e:
-                move_errors.append(f"{folder} (verwijderen): {e}")
+        if recycle_dirs:
+            folder_name = os.path.basename(os.path.normpath(folder))
+            if os.path.abspath(folder) == os.path.abspath(input_dir):
+                skipped_folders.append(f"{folder} (hoofdmap wordt nooit verplaatst)")
+            elif not is_detection_folder_name(folder_name):
+                skipped_folders.append(f"{folder} (naam begint niet met JJJJ-MM-DD)")
+            else:
+                try:
+                    os.makedirs(recycle_root, exist_ok=True)
+                    move_to_recycle_bin(folder, input_dir, recycle_root)
+                    recycled_folders += 1
+                except Exception as e:
+                    move_errors.append(f"{folder} (naar recycle_bin): {e}")
 
         processed_folders += 1
         eel.update_progress(processed_folders, total_folders)()
@@ -167,6 +225,15 @@ def process_images(config):
         summary += ("\n\nLet op: er is niets verplaatst. De gekozen strategie vond geen passend "
                     "bestand in de mappen (bijv. strategie 'Highest Confidence' terwijl de bestanden "
                     "best.jpg/clean.jpg heten).")
+    if recycle_dirs:
+        summary += (f"\n\n{recycled_folders} map(pen) verplaatst naar de recycle_bin:\n{recycle_root}"
+                    "\nEr wordt niets definitief verwijderd; leeg deze map zelf als je zeker weet dat "
+                    "de inhoud weg mag.")
+        if skipped_folders:
+            summary += (f"\n\n{len(skipped_folders)} map(pen) bleven staan omdat de naam niet aan het "
+                        "formaat JJJJ-MM-DD... voldoet:\n" + "\n".join(skipped_folders[:10]))
+            if len(skipped_folders) > 10:
+                summary += f"\n... en nog {len(skipped_folders) - 10} meer."
     if move_errors:
         summary += f"\n\n{len(move_errors)} bestand(en) overgeslagen door fouten:\n" + "\n".join(move_errors[:10])
         if len(move_errors) > 10:

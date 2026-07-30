@@ -163,8 +163,13 @@
     </label>
     <label class="checkbox-label" class:disabled={config.copy_files}>
       <input type="checkbox" bind:checked={config.delete_subfolders} disabled={config.copy_files} />
-      Delete original subfolders after extracting
+      Move original subfolders to recycle_bin after extracting
     </label>
+    <p class="hint">
+      Subfolders are never deleted: they are moved to a <code>recycle_bin</code> folder inside the
+      input folder, and only when their name starts with a date (YYYY-MM-DD). Anything else stays
+      untouched.
+    </p>
   </section>
 
   <button class="primary" on:click={start} disabled={isProcessing}>
@@ -219,6 +224,8 @@
   .inline-label { margin: 0; }
   .checkbox-label { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; cursor: pointer; }
   .checkbox-label.disabled { opacity: 0.5; cursor: not-allowed; }
+  .hint { margin: -4px 0 10px 26px; font-size: 0.85em; color: #666; line-height: 1.4; }
+  .hint code { background: #eee; padding: 1px 4px; border-radius: 3px; }
 
   .folder-btn { padding: 8px 16px; border-radius: 4px; border: 1px solid #ccc; background: #fff; cursor: pointer; transition: 0.2s; }
   .folder-btn:hover { background: #eef; }
