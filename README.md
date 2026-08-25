@@ -33,3 +33,7 @@ The application offers several extraction strategies, divided into two main cate
 3. **Extract video.mp4:** Extracts the `video.mp4` file from each subfolder.****
 
    <img width="880" height="886" alt="image_extractr" src="https://github.com/user-attachments/assets/15618c1f-54f3-4852-81ed-9f263d277efc" />
+
+### Logo
+   <img width="1200" height="1200" alt="image extractor logo" src="https://github.com/user-attachments/assets/8da4c475-f85a-4b03-82c9-bd12376af075" />
+
